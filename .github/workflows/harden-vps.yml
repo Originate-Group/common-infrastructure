@@ -103,17 +103,17 @@ jobs:
             log_step "Installing fail2ban..."
             sudo apt-get install -y -qq fail2ban
 
-            # Configure fail2ban for SSH
-            sudo tee /etc/fail2ban/jail.local > /dev/null << 'F2BEOF'
-[sshd]
-enabled = true
-port = ssh
-filter = sshd
-logpath = /var/log/auth.log
-maxretry = 3
-bantime = 3600
-findtime = 600
-F2BEOF
+            # Configure fail2ban for SSH (using brace groups, not heredocs - deployment-sme pattern #1)
+            {
+              echo "[sshd]"
+              echo "enabled = true"
+              echo "port = ssh"
+              echo "filter = sshd"
+              echo "logpath = /var/log/auth.log"
+              echo "maxretry = 3"
+              echo "bantime = 3600"
+              echo "findtime = 600"
+            } | sudo tee /etc/fail2ban/jail.local > /dev/null
 
             sudo systemctl enable fail2ban
             sudo systemctl restart fail2ban
