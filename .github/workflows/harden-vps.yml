@@ -84,7 +84,7 @@ jobs:
             if command -v docker &> /dev/null; then
               log_warn "Docker already installed: $(docker --version)"
             else
-              ./scripts/setup-docker.sh
+              sudo ./scripts/setup-docker.sh
             fi
 
             # Step 5: Install Caddy
@@ -92,12 +92,12 @@ jobs:
             if command -v caddy &> /dev/null; then
               log_warn "Caddy already installed: $(caddy version)"
             else
-              ./scripts/setup-caddy.sh
+              sudo ./scripts/setup-caddy.sh
             fi
 
             # Step 6: Configure firewall
             log_step "Configuring UFW firewall..."
-            ./scripts/setup-firewall.sh
+            sudo ./scripts/setup-firewall.sh
 
             # Step 7: Install fail2ban
             log_step "Installing fail2ban..."
