@@ -236,8 +236,13 @@ restart_ssh() {
     echo
 
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        systemctl restart sshd
-        log_info "SSH service restarted"
+        # Try both service names (ssh on Ubuntu, sshd on other systems)
+        if systemctl restart ssh 2>/dev/null || systemctl restart sshd 2>/dev/null; then
+            log_info "SSH service restarted"
+        else
+            log_error "Failed to restart SSH service"
+            exit 1
+        fi
         echo
         log_info "SSH is now hardened. Test your connections in NEW terminals:"
         log_info "  ssh $ADMIN_USER@YOUR_VPS_IP    (personal admin access)"
@@ -245,7 +250,7 @@ restart_ssh() {
         echo
         log_warn "DO NOT close this session until you've verified the new connections work!"
     else
-        log_warn "SSH restart skipped. Remember to run: systemctl restart sshd"
+        log_warn "SSH restart skipped. Remember to run: systemctl restart ssh"
     fi
 }
 
