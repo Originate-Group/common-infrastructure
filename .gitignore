@@ -1,0 +1,38 @@
+# Secrets and credentials
+*.key
+*.pem
+*.ppk
+.env
+.env.*
+!.env.example
+
+# SSH keys (never commit)
+id_rsa*
+id_ed25519*
+authorized_keys
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Terraform state (if we add IaC later)
+*.tfstate
+*.tfstate.backup
+.terraform/
+
+# Ansible vault (if we add Ansible later)
+*.vault
+
+# Temporary files
+tmp/
+temp/
+*.tmp
