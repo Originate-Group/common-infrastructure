@@ -26,6 +26,7 @@ common-infrastructure/
 ├── scripts/
 │   ├── harden-ubuntu-vps.sh          # Main hardening script
 │   ├── setup-docker.sh                # Docker installation
+│   ├── setup-caddy.sh                 # Caddy web server installation
 │   ├── setup-ssh-keys.sh              # SSH key configuration
 │   └── setup-firewall.sh              # UFW firewall rules
 ├── docs/
@@ -76,6 +77,12 @@ cd common-infrastructure
 - Install Docker Engine
 - Install Docker Compose plugin
 - Add deployment user to docker group
+
+### Caddy Web Server
+- Install Caddy from official repository
+- Configure multi-app architecture with import directory
+- Create `/etc/caddy/conf.d/` for application snippets
+- Set up automatic HTTPS with Let's Encrypt
 
 ### System Baseline
 - Update all packages

@@ -62,6 +62,7 @@ The script will:
 - Create `originate-devops` user with sudo access
 - Configure SSH keys for deployment
 - Install Docker Engine and Docker Compose
+- Install and configure Caddy web server
 - Harden SSH configuration
 
 ### 4. Add GitHub SSH Public Key
@@ -99,6 +100,10 @@ sudo -l
 docker --version
 docker compose version
 
+# Verify Caddy
+caddy version
+sudo systemctl status caddy
+
 # Check firewall status
 sudo ufw status
 
@@ -129,6 +134,9 @@ cd common-infrastructure/scripts
 
 # 4. Install Docker
 ./setup-docker.sh
+
+# 5. Install Caddy
+./setup-caddy.sh
 ```
 
 ## Configuration Options
@@ -307,15 +315,58 @@ Each VPS should:
 - Use the same SSH key from org secrets
 - Have unique SSH_HOST in repository secrets
 
+### Caddy Multi-App Configuration
+
+The VPS is configured with Caddy for serving multiple applications on different domains. The architecture uses an import directory pattern:
+
+**Main Configuration:**
+- `/etc/caddy/Caddyfile` - Main file (managed by `common-infrastructure`, DO NOT MODIFY)
+- `/etc/caddy/conf.d/` - Directory for application-specific snippets
+
+**How Applications Should Deploy:**
+
+Each application deployment (e.g., Keycloak, RaaS) should:
+
+1. Write its own configuration snippet to `/etc/caddy/conf.d/<app-name>.caddy`
+2. Reload Caddy with `sudo systemctl reload caddy`
+3. Never overwrite the main `/etc/caddy/Caddyfile`
+
+**Example Snippet (`/etc/caddy/conf.d/keycloak.caddy`):**
+
+```caddy
+auth.originate.group {
+    reverse_proxy localhost:8080
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    log {
+        output file /var/log/caddy/keycloak-access.log
+        format json
+    }
+}
+```
+
+**Benefits:**
+- No conflicts between applications
+- Each app manages its own configuration
+- Atomic reloads - Caddy validates before applying
+- Clean separation of concerns
+
 ## Next Steps
 
 After VPS hardening is complete:
 
 1. Deploy applications via GitHub Actions
-2. Configure domain DNS records
-3. Set up SSL certificates (Let's Encrypt)
-4. Configure application-specific environment variables
-5. Set up monitoring and alerting
+2. Configure domain DNS records (A records pointing to VPS IP)
+3. Applications write their Caddy snippets to `/etc/caddy/conf.d/`
+4. Caddy automatically handles SSL certificates via Let's Encrypt
+5. Configure application-specific environment variables
+6. Set up monitoring and alerting
 
 ## Support
 

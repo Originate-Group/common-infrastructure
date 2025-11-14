@@ -197,6 +197,15 @@ main() {
         log_warn "Docker setup script not found, skipping"
     fi
 
+    # Run Caddy setup
+    if [[ -f "$SCRIPT_DIR/setup-caddy.sh" ]]; then
+        log_info "Running Caddy setup..."
+        bash "$SCRIPT_DIR/setup-caddy.sh"
+        echo
+    else
+        log_warn "Caddy setup script not found, skipping"
+    fi
+
     # Final steps
     log_info "Hardening complete!"
     echo
@@ -204,8 +213,9 @@ main() {
     log_info "  1. Verify you can SSH as ${DEPLOY_USER}"
     log_info "  2. Test sudo access: sudo -l"
     log_info "  3. Verify Docker: docker --version"
-    log_info "  4. Check firewall: sudo ufw status"
-    log_info "  5. Review fail2ban: sudo fail2ban-client status"
+    log_info "  4. Verify Caddy: caddy version"
+    log_info "  5. Check firewall: sudo ufw status"
+    log_info "  6. Review fail2ban: sudo fail2ban-client status"
     echo
     log_warn "IMPORTANT: Do not log out until you've verified SSH access with the new user!"
 }
