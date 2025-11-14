@@ -263,9 +263,9 @@ If you don't need personal SSH access to VPS (not recommended for admin tasks):
 - name: Deploy via SSH
   uses: appleboy/ssh-action@master
   with:
-    host: ${{ secrets.SSH_HOST }}
-    username: ${{ secrets.SSH_USER }}
-    key: ${{ secrets.SSH_PRIVATE_KEY }}
+    host: ${{ vars.VPS_HOST }}              # Repository variable
+    username: ${{ vars.SSH_USER }}          # Organization variable
+    key: ${{ secrets.SSH_PRIVATE_KEY }}     # Organization secret
     script: |
       cd /opt/myapp
       docker compose pull
@@ -273,6 +273,8 @@ If you don't need personal SSH access to VPS (not recommended for admin tasks):
 ```
 
 However, for troubleshooting and emergency fixes, personal admin access (wkenn via 1Password) is essential.
+
+For more details on configuring GitHub Secrets and Variables, see [GITHUB-SECRETS-VARIABLES.md](./GITHUB-SECRETS-VARIABLES.md) or use the Claude skill: `/github-secrets-variables`
 
 ## Resources
 

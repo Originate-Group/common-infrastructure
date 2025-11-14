@@ -100,6 +100,81 @@ cd common-infrastructure
 
 - [VPS Setup Guide](./docs/VPS-SETUP.md) - Detailed setup instructions
 - [1Password SSH Integration](./docs/SSH-1PASSWORD.md) - SSH key management for CI/CD
+- [GitHub Secrets and Variables Guide](./docs/GITHUB-SECRETS-VARIABLES.md) - Comprehensive reference for configuring secrets vs variables
+
+## Claude Code Skills
+
+### Repository-Local Skills
+
+This repository provides reusable Claude Code skills for deployment repos:
+
+- **`/github-secrets-variables`** - Interactive guidance for configuring GitHub Secrets and Variables correctly
+
+#### Using Local Skills in Other Repos
+
+To use these skills in your deployment repository, add to your `.claude/CLAUDE.md`:
+
+```markdown
+## Skills
+
+- [GitHub Secrets/Variables](@Originate-Group/common-infrastructure:.claude/skills/github-secrets-variables.md) - Guidance on configuring GitHub Actions secrets and variables
+```
+
+### Global Skills
+
+Global skills are installed to `~/.claude/skills/` and available across all projects:
+
+#### `/deployment-sme` - Deployment Subject Matter Expert
+**Location**: `~/.claude/skills/deployment-sme.md`
+
+Expert guidance for GitHub Actions deployment workflows, based on 40+ production deployment commits.
+
+**Capabilities**:
+- Prevent 15 common deployment failures before they occur
+- Proactively apply battle-tested patterns
+- Fix YAML, Docker, SSH, and Caddy configuration issues
+- Eliminate 20-30 iteration deployment cycles
+
+**Key patterns**:
+- YAML heredoc syntax (use brace groups, not heredocs)
+- appleboy/ssh-action best practices
+- Caddy multi-app snippet architecture
+- Docker Compose v2 commands
+- Python venv on Ubuntu 24.04
+- Keycloak health check ports
+- And 9 more proven patterns
+
+**Usage**: Available globally in any deployment repository - Claude automatically applies learned patterns.
+
+#### `/infrastructure-agent` - VPS Bootstrap Automation
+**Location**: `~/.claude/skills/infrastructure-agent.md`
+
+Autonomous agent for automating VPS infrastructure setup from fresh server to production-ready environment.
+
+**Capabilities**:
+- Bootstrap fresh VPS with password authentication
+- Create deployment user and configure SSH keys
+- Trigger automated hardening via GitHub Actions
+- Monitor workflow progress
+- Validate infrastructure state
+- Security-first approach (never logs passwords)
+
+**Workflow**:
+1. Bootstrap VPS (one-time manual step with root password)
+2. Trigger GitHub Actions hardening workflow
+3. Monitor progress and report status
+4. Validate Docker, Caddy, firewall, Python installed
+
+**Usage**:
+```
+Bootstrap VPS at 192.168.1.100 with root password <password>
+```
+
+**See**: [infrastructure-agent.md](~/.claude/skills/infrastructure-agent.md) for detailed documentation
+
+---
+
+**Installation**: Global skills are already installed in `~/.claude/skills/` and available everywhere.
 
 ## Support
 

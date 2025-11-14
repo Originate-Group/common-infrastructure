@@ -15,11 +15,24 @@ Complete guide for hardening fresh Ubuntu VPS instances for Originate Group depl
 - Minimum 2GB RAM
 - Minimum 20GB disk space
 
-### GitHub Secrets Required
-At the organization level, you should have:
+### GitHub Configuration Required
+
+At the **organization level**, you should have:
+
+**Secrets** (encrypted):
 - `SSH_PRIVATE_KEY` - Private key for CI/CD deployments
+
+**Variables** (plain text):
 - `SSH_USER` - Deployment username (should be `originate-devops`)
-- `SSH_HOST` - Will be set per VPS
+- `SSH_PORT` - SSH port (default: `22`)
+- `ADMIN_EMAIL` - Contact email for Let's Encrypt (e.g., `admin@originate.group`)
+
+At the **repository level**, each deployment repo should have:
+
+**Variables**:
+- `VPS_HOST` - IP address or hostname of target VPS (specific to each app/VPS)
+
+See [GITHUB-SECRETS-VARIABLES.md](./GITHUB-SECRETS-VARIABLES.md) for comprehensive guidance on secrets vs variables, or use the Claude skill: `/github-secrets-variables`
 
 ## Quick Start
 
@@ -173,15 +186,16 @@ Wayne's personal access is handled via 1Password SSH agent. No additional config
 
 ### Configure GitHub Actions
 
-In your application repository (e.g., `originate-keycloak-deployment`), add these secrets:
+In your application repository (e.g., `originate-keycloak-deployment`):
 
-**Repository secrets:**
-- `SSH_HOST` - VPS IP address
-- `SSH_PORT` - SSH port (default: 22)
+**Repository variables** (set in repo Settings → Secrets and variables → Actions → Variables):
+- `VPS_HOST` - VPS IP address or hostname
 
-**Organization secrets (already configured):**
-- `SSH_PRIVATE_KEY` - Private key for CI/CD
-- `SSH_USER` - Deployment username (`originate-devops`)
+**Organization configuration** (already configured by org admin):
+- `SSH_PRIVATE_KEY` (Secret) - Private key for CI/CD
+- `SSH_USER` (Variable) - Deployment username (`originate-devops`)
+- `SSH_PORT` (Variable) - SSH port (default: `22`)
+- `ADMIN_EMAIL` (Variable) - Contact email for Let's Encrypt
 
 ### Test GitHub Actions Deployment
 
@@ -198,10 +212,10 @@ jobs:
       - name: Test SSH
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
+          host: ${{ vars.VPS_HOST }}              # Repository variable
+          username: ${{ vars.SSH_USER }}          # Organization variable
+          port: ${{ vars.SSH_PORT }}              # Organization variable
+          key: ${{ secrets.SSH_PRIVATE_KEY }}     # Organization secret
           script: |
             whoami
             docker --version
@@ -302,18 +316,18 @@ For setting up multiple VPS instances:
 # VPS 1 - Keycloak
 ssh root@keycloak-vps-ip
 # Run hardening script
-# Add SSH_HOST secret to originate-keycloak-deployment repo
+# Add VPS_HOST variable to originate-keycloak-deployment repo
 
 # VPS 2 - Requirements Service
 ssh root@raas-vps-ip
 # Run hardening script
-# Add SSH_HOST secret to originate-requirements-service repo
+# Add VPS_HOST variable to originate-requirements-service repo
 ```
 
 Each VPS should:
-- Use the same `originate-devops` user
-- Use the same SSH key from org secrets
-- Have unique SSH_HOST in repository secrets
+- Use the same `originate-devops` user (from org variable SSH_USER)
+- Use the same SSH key (from org secret SSH_PRIVATE_KEY)
+- Have unique VPS_HOST in repository variables
 
 ### Caddy Multi-App Configuration
 
