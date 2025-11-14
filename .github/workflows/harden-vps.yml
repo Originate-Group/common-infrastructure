@@ -139,7 +139,7 @@ jobs:
             # Test SSH configuration
             if sudo sshd -t; then
               log_info "SSH configuration valid, restarting service..."
-              sudo systemctl restart sshd
+              sudo systemctl restart ssh
             else
               log_warn "SSH configuration test failed, reverting..."
               sudo cp /etc/ssh/sshd_config.backup /etc/ssh/sshd_config
