@@ -1,6 +1,8 @@
-# common-infrastructure
+# originate-harden-vps
 
 Production-grade VPS hardening automation for Ubuntu 24.04 LTS.
+
+**Maintainer:** [Wayne Kennedy](https://github.com/WayneKennedy)
 
 ## Purpose
 

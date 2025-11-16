@@ -112,7 +112,7 @@ Use GitHub CLI to trigger the hardening workflow:
 ```bash
 # Trigger workflow
 gh workflow run harden-vps.yml \
-  -R YOUR-ORG/common-infrastructure \
+  -R YOUR-ORG/originate-harden-vps \
   -f vps_host=YOUR_VPS_IP
 
 # Monitor progress
@@ -223,7 +223,7 @@ gh auth login
 
 ### Cannot Set Organization Secrets/Variables
 - Ensure user has admin permissions in the GitHub organization
-- Alternatively, use repository-level secrets: `gh secret set SECRET_NAME --repo YOUR-ORG/common-infrastructure`
+- Alternatively, use repository-level secrets: `gh secret set SECRET_NAME --repo YOUR-ORG/originate-harden-vps`
 
 ### Workflow Cannot Connect to VPS
 - Verify deploy user exists on VPS with SSH key configured
