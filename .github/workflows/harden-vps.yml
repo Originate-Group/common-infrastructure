@@ -120,20 +120,45 @@ jobs:
             log_step "Installing fail2ban..."
             sudo apt-get install -y -qq fail2ban
 
-            # Configure fail2ban for SSH (idempotent - overwrite is safe)
+            # Create Caddy security scanner filter (matches 404s on sensitive paths)
+            # Caddy logs in JSON format, so we parse the status and URI fields
             {
-              echo "[sshd]"
-              echo "enabled = true"
-              echo "port = ssh"
-              echo "filter = sshd"
-              echo "logpath = /var/log/auth.log"
-              echo "maxretry = 3"
-              echo "bantime = 3600"
-              echo "findtime = 600"
+              echo '[Definition]'
+              echo '# Matches Caddy JSON log entries where status=404 and URI matches sensitive paths'
+              echo '# Caddy JSON format: {"level":"info","ts":...,"request":{"uri":"/path"},"status":404,...}'
+              echo 'failregex = ^.*"client_ip":"<HOST>".*"uri":"(/\.env|/\.git|/\.aws|/\.docker|/wp-config\.php|/config\.json|/backup|/\.sql|/docker-compose|/Dockerfile|/credentials|/secrets|/\.gitlab-ci\.yml).*"status":404.*$'
+              echo 'ignoreregex ='
+            } | sudo tee /etc/fail2ban/filter.d/caddy-security.conf > /dev/null
+
+            # Configure fail2ban jails (idempotent - overwrite is safe)
+            {
+              echo '[DEFAULT]'
+              echo '# Whitelist localhost and common internal ranges'
+              echo 'ignoreip = 127.0.0.1/8 ::1'
+              echo ''
+              echo '[sshd]'
+              echo 'enabled = true'
+              echo 'port = ssh'
+              echo 'filter = sshd'
+              echo 'logpath = /var/log/auth.log'
+              echo 'maxretry = 3'
+              echo 'bantime = 3600'
+              echo 'findtime = 600'
+              echo ''
+              echo '[caddy-security]'
+              echo '# Ban IPs that repeatedly probe for sensitive files'
+              echo 'enabled = true'
+              echo 'port = http,https'
+              echo 'filter = caddy-security'
+              echo 'logpath = /var/log/caddy/*-access.log'
+              echo 'maxretry = 5'
+              echo 'bantime = 86400'
+              echo 'findtime = 300'
             } | sudo tee /etc/fail2ban/jail.local > /dev/null
 
             sudo systemctl enable fail2ban
             sudo systemctl restart fail2ban
+            log_info "fail2ban configured with SSH and Caddy security scanner jails"
 
             # =================================================================
             # STEP 6: Install Docker (idempotent)
@@ -740,6 +765,7 @@ jobs:
             echo "  Firewall: $(sudo ufw status | head -1)"
             echo "  SSH Rate Limiting: Enabled (6 conn/30sec)"
             echo "  Fail2ban: $(sudo systemctl is-active fail2ban)"
+            echo "  Fail2ban Jails: sshd (3 attempts/10min), caddy-security (5 probes/5min)"
             echo "  SSH Root Login: Disabled"
             echo "  SSH Password Auth: Disabled"
             echo ""
